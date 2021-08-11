@@ -24,8 +24,8 @@ class CamPage extends StatefulWidget {
 }
 
 class _CamPageState extends State<CamPage> {
-  int numCam = 0;
-  Uint8List cam = new Uint8List(7000);
+  //int numCam = 0;
+  //Uint8List cam = new Uint8List(7000);
   bool tapping = false;
 
   final _globalkey = new GlobalKey();
@@ -33,7 +33,7 @@ class _CamPageState extends State<CamPage> {
   @override
   void initState() {
     // TODO: implement initState
-    numCam = widget.name == 'Patio' ? 1 : 2;
+    //numCam = widget.name == 'Patio' ? 1 : 2;
     _requestPermission();
     super.initState();
   }
@@ -83,6 +83,28 @@ class _CamPageState extends State<CamPage> {
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle style = Theme.of(context).textTheme.title!.copyWith(
+      fontWeight: FontWeight.w700,
+      fontSize: 48,
+      shadows: [
+        Shadow(
+            // bottomLeft
+            offset: Offset(-1, -1),
+            color: Colors.white),
+        Shadow(
+            // bottomRight
+            offset: Offset(1, -1),
+            color: Colors.white),
+        Shadow(
+            // topRight
+            offset: Offset(1, 1),
+            color: Colors.white),
+        Shadow(
+            // topLeft
+            offset: Offset(-1, 1),
+            color: Colors.white),
+      ],
+    );
     return Scaffold(
       backgroundColor: Color(0xFFFFFFFF),
       extendBodyBehindAppBar: true,
@@ -99,15 +121,15 @@ class _CamPageState extends State<CamPage> {
             children: [
               GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
-                child: SvgPicture.asset('assets/svg/back.svg'),
+                child: SvgPicture.asset('assets/svg/backbord.svg'),
               ),
               SizedBox(width: 15),
-              Text(
-                widget.name,
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 48,
+              Hero(
+                tag: 'Title',
+                child: Text(
+                  widget.name,
+                  textAlign: TextAlign.left,
+                  style: style,
                 ),
               ),
             ],
@@ -115,74 +137,70 @@ class _CamPageState extends State<CamPage> {
         ),
         preferredSize: Size(MediaQuery.of(context).size.width, 75),
       ),
-      body: Flex(
-        direction: Axis.vertical,
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
         children: [
-          Stack(
-            children: [
-              StreamBuilder(
-                stream: widget.channel.stream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    var buf = snapshot.data as Uint8List;
+          Container(
+            child: StreamBuilder(
+              stream: widget.channel.stream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  var buf = snapshot.data as Uint8List;
 
-                    if (buf[12] == numCam) {
-                      cam = buf;
-                    }
-
-                    return Container(
-                      alignment: Alignment.center,
-                      height: MediaQuery.of(context).size.height,
-                      child: ClipRect(
-                        child: PhotoView.customChild(
-                          initialScale: 1.0,
-                          backgroundDecoration: BoxDecoration(
-                            color: Color(0xFFFFFFFF),
-                          ),
-                          child: RepaintBoundary(
-                            key: _globalkey,
+                  return Container(
+                    alignment: Alignment.center,
+                    height: MediaQuery.of(context).size.height,
+                    child: PhotoView.customChild(
+                      initialScale: 1.0,
+                      backgroundDecoration: BoxDecoration(
+                        color: Color(0xFFFFFFFF),
+                      ),
+                      child: RepaintBoundary(
+                        key: _globalkey,
+                        child: Transform.rotate(
+                          angle: 3.141592,
+                          child: Hero(
+                            tag: widget.name,
                             child: Image.memory(
-                              cam,
+                              buf,
                               gaplessPlayback: true,
                             ),
                           ),
                         ),
                       ),
-                    );
-                  } else {
-                    return Text('No JalaX2');
-                  }
-                },
-              ),
-              Positioned(
-                child: GestureDetector(
-                  onTap: takePhoto,
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 800),
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: !tapping ? Colors.white : Colors.black,
-                      //borderRadius: BorderRadius.circular(50),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.20),
-                          blurRadius: 8,
-                          offset: Offset(0, 3),
-                        )
-                      ],
                     ),
-                    child: SvgPicture.asset(
-                      'assets/svg/cam.svg',
-                      fit: BoxFit.scaleDown,
-                    ),
-                  ),
+                  );
+                } else {
+                  return Text('No JalaX2');
+                }
+              },
+            ),
+          ),
+          Positioned(
+            child: GestureDetector(
+              onTap: takePhoto,
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 800),
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  color: !tapping ? Colors.white : Colors.black,
+                  //borderRadius: BorderRadius.circular(50),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0, 0.20),
+                      blurRadius: 8,
+                      offset: Offset(0, 3),
+                    )
+                  ],
                 ),
-                top: MediaQuery.of(context).size.height * 0.75,
-                left: MediaQuery.of(context).size.width * 0.40,
+                child: SvgPicture.asset(
+                  'assets/svg/cam.svg',
+                  fit: BoxFit.scaleDown,
+                ),
               ),
-            ],
+            ),
+            top: MediaQuery.of(context).size.height * 0.75,
+            left: MediaQuery.of(context).size.width * 0.40,
           ),
         ],
       ),

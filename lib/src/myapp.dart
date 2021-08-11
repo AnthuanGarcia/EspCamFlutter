@@ -13,11 +13,10 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Inter',
       ),
       onGenerateRoute: (RouteSettings settings) => MaterialPageRoute(
-        builder: (BuildContext context) => InitPage(
-          channel: WebSocketChannel.connect(
-            Uri.parse("ws://camest.herokuapp.com"),
-          ),
-        ),
+        builder: (BuildContext context) => InitPage(channels: [
+          WebSocketChannel.connect(Uri.parse("ws://camest.herokuapp.com")),
+          WebSocketChannel.connect(Uri.parse("ws://camest2.herokuapp.com"))
+        ]),
       ),
     );
   }
